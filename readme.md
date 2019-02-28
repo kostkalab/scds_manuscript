@@ -182,7 +182,7 @@ $ docker run -it --cpuset-cpus="0-1"                                  \
                  --net=host                                           \
                  --env DISPLAY=$DISPLAY                               \
                  --volume $HOME/.Xauthority:/home/rstudio/.Xauthority \
-                 kostkalab_scds                                       \
+                 kostkalab/scds:v1.0                                  \
                  /bin/bash
 ```
 
