@@ -24,7 +24,7 @@ In the shell from above, get the code from github
 
 ```{bash}
 $ cd
-$ git clone https://dkostka@bitbucket.org/dkostka/scds_manuscript.git
+$ git clone https://github.com/kostkalab/scds_manuscript.git 
 $ cd scds_manuscript
 ```
 ### Step 2: Downloading and processing the data
