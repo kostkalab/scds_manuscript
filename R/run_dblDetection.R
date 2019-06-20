@@ -14,7 +14,6 @@ run_dblDetection <- function(sce){
   scores     = colMeans(res.dbd$all_log_p_values_, na.rm = TRUE)
 
   colData(sce)$dblDetection_score = -scores
-  colData(sce)$dblDetection_call  = preds
+  colData(sce)$dblDetection_call  = preds == 1
   return(sce)
 }
-

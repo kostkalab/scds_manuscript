@@ -45,7 +45,7 @@ run_dblFinder <- function(sce, use_celltype_anno = FALSE, gitParamSettings = TRU
 
   ## store results
   colData(sce)$dblFinder_score = seu@meta.data[, paste0("pANN_", cn)]
-  colData(sce)$dblFinder_call  = seu@meta.data[, paste0("DF.classifications_", cn)]
+  colData(sce)$dblFinder_call  = seu@meta.data[, paste0("DF.classifications_", cn)] == "Doublet"
   metadata(sce)$doubletfinder = list("params" = cn,
                                      "bcmvn" = bcmvn,
                                      "pK" = pK)

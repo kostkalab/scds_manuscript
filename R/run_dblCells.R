@@ -25,7 +25,7 @@ run_dblCells <- function(sce){
   summary(dbl.dens)
 
   colData(sce)$dblCells_score = dbl.dens
-
+  colData(sce)$dblCells_call  = rep(NA,ncol(sce))
   return(sce)
 }
 

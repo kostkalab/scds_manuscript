@@ -24,7 +24,7 @@ In the shell from above, get the code from github
 
 ```{bash}
 $ cd
-$ git clone https://github.com/kostkalab/scds_manuscript.git 
+$ git clone https://github.com/kostkalab/scds_manuscript.git
 $ cd scds_manuscript
 ```
 ### Step 2: Downloading and processing the data
@@ -94,10 +94,10 @@ $ for method in {bcds,cxds,hybrid,scrublet}; do
 ```
 will run four methods on all data sets.
 
-Results are written out in text files named according to ```./results/tmp/[dataset]_[method].txt```, which contain one line for each cell and two columns. The first
-column contains the cell's barcode, the second the doublet score of the method.
-Higher scores indicate more confidence in annotating a doublet.
-For ```DoubletDecon``` we annotate doublet calls instead of scores.
+Results are written out in text files named according to ```./results/tmp/[dataset]_[method].txt```, which contain one line for each cell and three columns. The first
+column contains the cell's barcode, the second the doublet score of the method, and the third column doublet calls (```TRUE```/```FALSE```, with ```TRUE``` indicating called doublets).
+Higher scores indicate more confidence in annotating a doublet. For methods without calls (```dblCells```) or without scores (```dblDecon```) the respective entries are ```NA```.
+
 
 Finally, the script ```./R/combine_results.R``` combines all doublet annotations for
 each dataset and creates four ```SingleCellExperiments``` directly in the results directory:
@@ -114,22 +114,17 @@ $ R --vanilla < ./R/combine_results.R
 Each data set now contains doublet annotations in the ```colData``` as columns with the following
 names:
 
-* ```bcds_score```
-* ```cxds_score```
-* ```dblCells_score```
-* ```dblDecon_call```
-* ```dblDetection_score```
-* ```dblFinder_score```
-* ```hybrid_score```
-* ```libsize_score```
-* ```numfeat_score```
-* ```scrublet_score```
+```{$method}_{score,call}```
 
-This concludes doublet annotation. Processed and doublet-annotated data  can also be downloaded directly:
+where ```$method``` is one of ```{bcds, cxds, dblDecon, dblDetection, dblFinder, hybrid, scrublet, libsize, numfeat}```. The last two are baseline methods and have no associated calls. For example in ```R```:
 
-```{bash}
-$ lftp ...
+```{R}
+> sce.hgmm = readRDS("./results/sce_chpb.rds")
+> sce.hgmm$hybrid_score  #- <<- hybrid scores
+> sce.hgmm$scrublet_call #- <<- scrublet calls
 ```
+
+This concludes doublet annotation.
 
 ### Step 4: Analyzing doublet annotation results
 We analyze computational doublet annoations in four ```SingleCellExperiment``` objects, one for each data set (see Step 3 above).

@@ -26,21 +26,19 @@ for(da in dats){
 		}
 		anno = read.table(anno_file,stringsAsFactors=FALSE)
 		scrs = anno[,2] ; names(scrs) = anno[,1]
+    clls = anno[,3] ; names(clls) = anno[,1]
 		if(! all(colnames(sce) %in% names(scrs)) ){
 			cat("    --> Missing barcodes! Skipping. \n")
       next
   	}
-    if(me != "dblDecon"){
-		      cn = paste(me,"_","score",sep="")
-		      colData(sce)[,cn] = scrs[colnames(sce)]
-    } else {
-      cn = paste(me,"_","call",sep="")
-      colData(sce)[,cn] = scrs[colnames(sce)]
+		cn = paste(me,"_","score",sep="")
+		colData(sce)[,cn] = scrs[colnames(sce)]
+    cn = paste(me,"_","call",sep="")
+    colData(sce)[,cn] = clls[colnames(sce)]
     }
-	}
 
   #- add baseline methods
   sce$libsize_score = Matrix::colSums(counts(sce))
-  sce$numfeat_score = Matrix::colSums(counts(sce)>0)
+  sce$numfeat_call  = Matrix::colSums(counts(sce)>0)
 	saveRDS(sce,out_file)
 }
