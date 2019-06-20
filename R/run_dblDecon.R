@@ -61,9 +61,8 @@ run_dblDecon <- function(sce, species = "hsa"){
   if(all(sub("\\.", "",rownames(doublets_res)) %in%  gsub("-", "", rownames(colData(sce))) )) {
           rownames(doublets_res) <- gsub("\\.", "-", rownames(doublets_res))}
 
-  colData(sce)$dblDecon_call = rep("Singlet", ncol(sce))
-  colData(sce)[rownames(doublets_res), ]$dblDecon_call = "Doublet"
+  colData(sce)$dblDecon_call = rep(FALSE, ncol(sce))
+  colData(sce)[rownames(doublets_res), ]$dblDecon_call = TRUE
   colData(sce)$dblDecon_score = rep(NA,ncol(sce))
-  metadata(sce)$dbl_decon_results = results
   return(sce)
 }
