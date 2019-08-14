@@ -62,7 +62,7 @@ plotPoints <- function(vname,dat,col=rgb(0,0,0,1),al=0.0,au=1,title=""){
 plotCXDSpairs <- function(sce,filename){
 #=======================================
 
-      if(is.null(metadata(sce)$cxds_topPairs)) stop("Error: No gene pairs found\n")
+      if(is.null(metadata(sce)$cxds$topPairs)) stop("Error: No gene pairs found\n")
 
       #- might need to run tsne
       if(is.null(reducedDim(sce,"tsne"))) stop("Error: tSNE projection found\n")
@@ -82,7 +82,7 @@ plotCXDSpairs <- function(sce,filename){
       hb        = rowData(sce)$cxds_hvg_bool
       ho        = rowData(sce)$cxds_hvg_ordr[hb]
       hgs       = rs[ho]
-      gP        = apply( metadata(sce)$cxds_topPairs, 1, function(x) hgs[x])
+      gP        = apply( metadata(sce)$cxds$topPairs, 1, function(x) hgs[x])
       gs        = as.vector(gP)[1:50]
       dat       = data.frame(reducedDim(sce,"tsne"))
       names(ho) = hgs

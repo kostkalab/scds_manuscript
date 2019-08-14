@@ -86,13 +86,14 @@ $ R --vanilla -f ./R/apply_method.R  --args --data=hgmm --method=scrublet
 will run ```scrublet``` on the ```hgmm``` data, and
 
 ```{bash}
-$ for method in {bcds,cxds,hybrid,scrublet}; do
-    for data in {chcl,chpb,demu,hgmm}; do
-      R --vanilla -f ./R/apply_method.R  --args --data=$data --method=$method
+$ for method in {bcds,cxds,hybrid,scrublet,dblFinder,dblDetection,dblDecon,dblCells}; do
+      for data in {chcl,chpb,demu,hgmm}; do
+        R --vanilla -f ./R/apply_method.R  --args --data=$data --method=$method
     done
   done
 ```
-will run four methods on all data sets.
+
+will run four methods on all data sets (this will take a bit of time).
 
 Results are written out in text files named according to ```./results/tmp/[dataset]_[method].txt```, which contain one line for each cell and three columns. The first
 column contains the cell's barcode, the second the doublet score of the method, and the third column doublet calls (```TRUE```/```FALSE```, with ```TRUE``` indicating called doublets).
@@ -129,12 +130,6 @@ This concludes doublet annotation.
 ### Step 4: Analyzing doublet annotation results
 We analyze computational doublet annoations in four ```SingleCellExperiment``` objects, one for each data set (see Step 3 above).
 
-To reproduce tables and figures you can run the following scripts:
-
-* ```./R/mk_tabs.R```
-* ```./R/mk_figs.R```
-* ```./R/mk_running-time.R```
-
 #### Generate tables:
 
 The ```mk_tabs.R``` script will generate latex tables in the ```results``` subdirectory.
@@ -150,6 +145,9 @@ $ cat ./results/tab_perf_avrg.tex
 * ```tab_perf_cbnd.tex``` Methods performance for each data set in a sub-table.
 * ```tab_dbldecon-comp.tex ``` Comparison of other methods to ```dblDecon``` for the ```ch_cell-lines``` data
 * ```tab_hom-het.tex``` For the ```ch_cell-lines``` data, enrichment of hetertypic doublets in the true positive predictions for each method.
+* ```tab_bcds-7.tex``` To compare heuristics for the number of training rounds in ```bcds```.
+* ```tab_cxdsParams_ntop.tex``` To assess different values for the ```ntop``` parameter
+* ```tab_cxdsParams_binThresh.tex``` To assess different values for the ```binThresh``` parameter.
 
 #### Generate figures:
 
@@ -161,30 +159,28 @@ $ R --vanilla < ./R/mk_figs.R
 
  The figures generated are also written to the ```./results/``` directory. The following list of figures is produced:
 
-* ```fig_cxds_[method].jpg```
-* ```fig_perf_strat.pdf``` Methods performance for each data set.
+* ```fig_cxds_[dataset].jpg```
+* ```fig_perf_strat.pdf```
+* ```fig_perf_strat_supp.pdf```
 * ```fig_comp.pdf```
 * ```fig_size-strat_[method].pdf```
 * ```fig_tpfn_[method].jpg```
+* ```fig_fdr-nfp.pdf```
+* ```fig_fdr-fdr.pdf```
 
 #### Assess running time:
 
-To assess running time, we limited container resources to two cores by using the following command:
-
-```{bash}
-$ docker run -it --cpuset-cpus="0-1"                                  \
-                 --name scds_tab_fig                                  \
-                 --net=host                                           \
-                 --env DISPLAY=$DISPLAY                               \
-                 --volume $HOME/.Xauthority:/home/rstudio/.Xauthority \
-                 kostkalab/scds:v1.0                                  \
-                 /bin/bash
-```
-
-And then, after getting the code and data, unpacking and processing:
+To assess running time we limited resources with the following command:
 
 ```{bash}
 $ cd /home/rstudio/scds_manuscript
-$ R --vanilla < ./R/mk_running-times.R
+$ taskset --cpu-list 2,3,19,20 R --vanilla < ./R/mk_running-times_python.R
 $ cat ./results/tab_running-times.tex
+```
+#### Figure about robustness of performance assessment with respect to resampling of barcodes
+
+Running the following creates the two resampling figures in the ```./results``` subdirectory.
+
+```{bash}
+$ nohup R --vanilla < ./R/mk_fig_resampling.R & #- takes a while
 ```

@@ -21,8 +21,12 @@ scorePred <- function(resp, pred){
   r.1 = tmp[2]
   ap  = pr$auc.davis.goadrich
 
-  rn  = c("AUC","pAUC900","pAUC950","pAUC975","pAUC990","prec05","rec05","AUPRC")
-  res = c(a.0, a.1, a.2, a.3, a.4, p.1, r.1, ap)
+  ntp = sum(resp)
+  ord = order(pred,decreasing=TRUE)
+  tps = sum(resp[ord][1:ntp])
+
+  rn  = c("AUC","pAUC900","pAUC950","pAUC975","pAUC990","prec05","rec05","AUPRC","TP")
+  res = c(a.0, a.1, a.2, a.3, a.4, p.1, r.1, ap, tps)
   names(res) = rn
   return(res)
 }

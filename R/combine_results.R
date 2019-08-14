@@ -38,7 +38,7 @@ for(da in dats){
     }
 
   #- add baseline methods
-  sce$libsize_score = Matrix::colSums(counts(sce))
-  sce$numfeat_call  = Matrix::colSums(counts(sce)>0)
+  sce$libsize_score  = Matrix::colSums(counts(sce))
+  sce$numfeat_score  = Matrix::colSums(counts(sce)>0)
 	saveRDS(sce,out_file)
 }

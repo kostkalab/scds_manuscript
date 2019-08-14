@@ -2,6 +2,65 @@ library(scran)
 library(Seurat)
 library(DoubletFinder)
 
+
+## UPDATE: to skip for NaN values, which occur in micm data analysis
+## use this instead of DoubletFinder::summarizeSweep
+summarizeSweep_NA <- function (sweep.list, GT = FALSE, GT.calls = NULL) {
+    require(KernSmooth)
+    require(ROCR)
+    require(modes)
+    pK <- c(5e-04, 0.001, 0.005, seq(0.01, 0.3, by = 0.01))
+    pN <- seq(0.05, 0.3, by = 0.05)
+    if (GT == TRUE) {
+        sweep.stats <- as.data.frame(matrix(0L, nrow = length(sweep.list),
+                                            ncol = 4))
+        colnames(sweep.stats) <- c("pN", "pK", "AUC", "BCreal")
+        sweep.stats$pN <- factor(rep(pN, each = length(pK), levels = pN))
+        sweep.stats$pK <- factor(rep(pK, length(pN), levels = pK))
+    }
+    if (GT == FALSE) {
+        sweep.stats <- as.data.frame(matrix(0L, nrow = length(sweep.list),
+                                            ncol = 3))
+        colnames(sweep.stats) <- c("pN", "pK", "BCreal")
+        sweep.stats$pN <- factor(rep(pN, each = length(pK), levels = pN))
+        sweep.stats$pK <- factor(rep(pK, length(pN), levels = pK))
+    }
+    for (i in 1:length(sweep.list)) {
+        res.temp <- sweep.list[[i]]
+        ## Update: handle NaN cases: SKIP
+        if(any(is.na(res.temp))){
+            message("Skipped: ", names(sweep.list)[i], " (it is NA).")
+            next
+        }
+        gkde <- approxfun(bkde(res.temp$pANN, kernel = "normal"))
+        x <- seq(from = min(res.temp$pANN), to = max(res.temp$pANN),
+            length.out = nrow(res.temp))
+        sweep.stats$BCreal[i] <- bimodality_coefficient(gkde(x))
+        if (GT == FALSE) {
+            next
+        }
+        meta <- as.data.frame(matrix(0L, nrow = nrow(res.temp),
+            ncol = 2))
+        meta[, 1] <- GT.calls
+        meta[, 2] <- res.temp$pANN
+        train.ind <- sample(1:nrow(meta), round(nrow(meta)/2),
+            replace = FALSE)
+        test.ind <- (1:nrow(meta))[-train.ind]
+        colnames(meta) <- c("SinDub", "pANN")
+        meta$SinDub <- factor(meta$SinDub, levels = c("Doublet",
+            "Singlet"))
+        model.lm <- glm(SinDub ~ pANN, family = binomial(link = "logit"),
+            data = meta, subset = train.ind)
+        prob <- predict(model.lm, newdata = meta[test.ind, ],
+            type = "response")
+        ROCpred <- ROCR::prediction(predictions = prob, labels = meta$SinDub[test.ind])
+        perf.auc <- ROCR::performance(ROCpred, measure = "auc")
+        sweep.stats$AUC[i] <- perf.auc@y.values[[1]]
+    }
+    return(sweep.stats)
+}
+
+
 run_dblFinder <- function(sce, use_celltype_anno = FALSE, gitParamSettings = TRUE){
   pN = 0.25
 
@@ -25,7 +84,7 @@ run_dblFinder <- function(sce, use_celltype_anno = FALSE, gitParamSettings = TRU
 
   ## pK Identification
   sweep.res.list <- paramSweep(seu)
-  sweep.stats <- summarizeSweep(sweep.res.list) ## GT = FALSE is default
+  sweep.stats <- summarizeSweep_NA(sweep.res.list) ## GT = FALSE is default
 
   #- can't switch off plotting
   pdf("/dev/null")

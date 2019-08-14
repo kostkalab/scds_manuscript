@@ -5,6 +5,8 @@ ca  = commandArgs(trailingOnly = TRUE)
 dat = gsub("--data=",'',ca[grepl("--data",ca)])
 met = gsub("--method=",'',ca[grepl("--method",ca)])
 
+set.seed(6234534)
+
 #- files and functions
 method_script = paste("./R/run_",met,".R",sep="")
 method_name   = paste("run_",met,sep="")

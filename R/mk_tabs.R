@@ -36,15 +36,22 @@ tab.demu = mk_tab(sce.demu,"demu")
 tab.hgmm = mk_tab(sce.hgmm,"hgmm")
 rm(mk_tab)
 
+chcl_hl = paste("chcl: (", sum(sce.chcl$dbl_anno), " annotated doublets)", sep="")
+chpb_hl = paste("chpb: (", sum(sce.chpb$dbl_anno), " annotated doublets)", sep="")
+demu_hl = paste("demu: (", sum(sce.demu$dbl_anno), " annotated doublets)", sep="")
+hgmm_hl = paste("hgmm: (", sum(sce.hgmm$dbl_anno), " annotated doublets)", sep="")
 
 #- make one big table
 sink("./results/tab_perf_cbnd.tex")
-print(kable(rbind(tab.chcl,tab.chpb,tab.demu,tab.hgmm),"latex", booktabs=TRUE) %>%
-            kable_styling()                              %>%
-            group_rows("ch_cell-lines",1,9)              %>%
-            group_rows("ch_pbmc",10,18)                  %>%
-            group_rows("demuxlet",19,27)                 %>%
-            group_rows("hg-mm",28,36))
+
+rbind(tab.chcl,tab.chpb,tab.demu,tab.hgmm)                %>%
+round(2)                                                  %>%
+kable(format="latex", booktabs=TRUE,linesep="",align="r") %>%
+kable_styling()                                           %>%
+group_rows(chcl_hl,1,9)                                   %>%
+group_rows(chpb_hl,10,18)                                 %>%
+group_rows(demu_hl,19,27)                                 %>%
+group_rows(hgmm_hl,28,36)
 sink()
 
 #- average performance table:
@@ -53,7 +60,7 @@ tab = tab.chcl[rn,] + tab.chpb[rn,] + tab.demu[rn,] + tab.hgmm[rn,]
 tab = round(tab/4,2)
 tab = tab[order(tab[,1],tab[,8]),]
 sink("./results/tab_perf_avrg.tex")
-print(kable(format(tab,digits=2),"latex"))
+kable(round(tab,digits=2),format="latex", booktabs=TRUE, linesep = "")
 sink()
 
 #- COMPARISON WITH DOUBLET-DECON
@@ -63,14 +70,15 @@ source("./R/fu_tab_dbldecon-comp.R")
 
 dd.tab.chcl     = mk_dd_tab(sce.chcl)
 dd.tab.chpb     = mk_dd_tab(sce.chpb)
+dd.tab.demu     = mk_dd_tab(sce.demu)
 
-tab = round(cbind(dd.tab.chcl,dd.tab.chpb),2)
+tab = round(cbind(dd.tab.chcl,dd.tab.chpb,dd.tab.demu),2)
 oo  = order(rowMeans(tab[,c(7,14,21)]))
 
 sink("./results/tab_dbldecon-comp.tex")
-tmp <- kable(tab[oo,c(1,5,6,7,8,12,13,14,15,19,20,21)],"latex",booktabs=T) %>%
+tmp <- kable(tab[oo,c(1,5,6,7,8,12,13,14,15,19,20,21)],"latex",booktabs=T, linesep = "") %>%
          kable_styling() %>%
-         add_header_above(c( " " = 1, "ch_cell-lines" = 4, "ch_pbmc" = 4))
+         add_header_above(c( " " = 1, "ch_cell-lines" = 4, "ch_pbmc" = 4, "demu"=4))
 print(tmp)
 sink()
 
@@ -91,7 +99,7 @@ sce.chcl$type = mc  # <<- new annotations for het vs. hom
 source("./R/fu_tab_hom-het.R")
 tab = mk_hh_tab(sce.chcl)
 sink("./results/tab_hom-het.tex")
-print(kable(tab,"latex"))
+print(kable(tab,"latex", booktabs=TRUE))
 sink()
 
 
@@ -121,7 +129,7 @@ t4  = ffu(sce.hgmm.7,sce.hgmm)
 tab = round(rbind(t1,t2,t3,t4),2)
 
 sink("./results/tab_bcds-7.tex")
-print(kable(rbind(tab)[,c(1:4,8)],"latex", booktabs=TRUE) %>%
+print(kable(rbind(tab)[,c(1:4,8)],"latex", booktabs=TRUE, linesep="") %>%
             kable_styling()                               %>%
             group_rows("ch_cell-lines",1,3)               %>%
             group_rows("ch_pbmc",4,6)                     %>%
@@ -149,5 +157,17 @@ rbind(  countNA(sce.chcl),
         countNA(sce.chpb),
         countNA(sce.demu),
         countNA(sce.hgmm))
+
+
+#===========================================
+#- Do cxds parameters influence performance?
+#===========================================
+
+source("./wrk_tab_cxds-params.R")
+
+
+
+
+
 
 #- end

@@ -1,3 +1,4 @@
+library(data.table)
 library(Seurat)
 library(DoubletDecon)
 library(dplyr)
@@ -19,18 +20,23 @@ run_dblDecon <- function(sce, species = "hsa"){
 
   seu <- RunPCA(seu, pc.genes = seu@var.genes, pcs.print = 0)
   seu <- FindClusters(seu)
-  seu.markers <- FindAllMarkers(object = seu)
 
-  seu.markers = seu.markers[!grepl("\\.",rownames(seu.markers)),]
+  seu.markers <- FindAllMarkers(object = seu)
+  tmp.dt      <- data.table(cbind(seu.markers, rownames(seu.markers)))
+  setnames(tmp.dt, 8, "rn")
+  tmp1.dt     <- tmp.dt[, .SD[which.min(p_val_adj)], by = "gene"]
+  tmp1.df     <- data.frame(tmp1.dt[, c(2:7,1), with = FALSE])
+  rownames(tmp1.df) <- tmp1.dt$rn
+  seu.markers <- tmp1.df
   seu.markers <- seu.markers %>% group_by(cluster) %>% top_n(50, avg_logFC)
 
   ## Seurat output files for pre-processing with their function
   expression <- as(attributes(seu)$data, "matrix")
-  clusters <- seu@ident
+  clusters   <- seu@ident
 
-  exprsFile <- paste0(location, "input_exprs.txt")
+  exprsFile    <- paste0(location, "input_exprs.txt")
   clustersFile <- paste0(location, "input_clusters.txt")
-  genesFile <- paste0(location, "input_genes.txt")
+  genesFile    <- paste0(location, "input_genes.txt")
   write.table(expression, file = exprsFile, sep = "\t", row.names=TRUE, col.names = NA, quote=F)
   write.table(clusters, file = clustersFile, sep = "\t", row.names=TRUE, col.names = NA, quote=F)
   write.table(seu.markers, file = genesFile, sep = "\t", row.names=TRUE, col.names = NA, quote=F)

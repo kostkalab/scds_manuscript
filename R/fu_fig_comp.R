@@ -3,6 +3,7 @@ library(UpSetR)
 library(grid)
 library(gridExtra)
 
+source("./R/fu_fig_cxds.R") #- binfu
 
 upSetFu <- function(sce){
 #========================
@@ -22,11 +23,13 @@ dat$dblCells      = binFu(sce$dblCells_score,frc)
 
 hasAtt <- function(row,att) newData <- (row[att] >0)
 
-p = upset(dat,nsets=10,nintersects=20,show.numbers=FALSE,set_size.angles=90,
-  main.bar.color=rgb(0,0,0,1/3), matrix.color=rgb(0,0,0,1), sets.bar.color=rgb(0,0,0,1/3),
+p = upset(dat,nsets=10,nintersects=20,show.numbers=FALSE,
+  main.bar.color=rgb(0,0,0,1/3), matrix.color=rgb(0,0,0,1), set_size.show=FALSE,
   order.by=c("freq"), text.scale=1.4,mb.ratio=c(0.6,0.4),matrix.dot.alpha=0,
  queries = list(list(query = hasAtt, params = list("call"), color=rgb(0,0,0,1), active=TRUE))
 )
+
+#- remove bars manually
 
 return(p)
 }

@@ -24,8 +24,8 @@ mk_hh_tab <- function(sce){
     ors = unlist(lapply(rlist,function(x) x$estimate))
     pvs = unlist(lapply(rlist,function(x) x$p.value))
     tab = rbind(ors,pvs)
-    tab = tab[,order(tab[2,],decreasing=FALSE)]
     colnames(tab) = nms
+    tab = tab[,order(tab[2,],decreasing=FALSE)]
     rownames(tab)  = c("odds_ratio","p_value")
     tf  = tab
     tf[1,] = format(round(tab[1,],2),digits=2)
