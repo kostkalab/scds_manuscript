@@ -29,7 +29,6 @@ hg_ens = toupper(sapply(hg_ens, "[[",2))
 mm_ens = strsplit(rowData(sce_mm_counts)$ID,split="_")
 mm_ens = toupper(sapply(mm_ens, "[[",2))
 
-## 30th Jan 2019
 mart1 = useMart("ensembl", dataset="hsapiens_gene_ensembl")
 mart2 = useMart("ensembl", dataset="mmusculus_gene_ensembl")
 
@@ -56,8 +55,8 @@ map$bth   = paste(map[,1],map[,2],sep="|")
 hg_to_bth = map$bth; names(hg_to_bth) = map[,1]
 mm_to_bth = map$bth; names(mm_to_bth) = map[,2]
 
-hg_ind = hg_ens %in% map[,1] 
-mm_ind = mm_ens %in% map[,2] 
+hg_ind = hg_ens %in% map[,1]
+mm_ind = mm_ens %in% map[,2]
 
 #- ridiculous conversion orgy to end up with sparse matrix; DelayedArray does not (yet) do sparse with subset or sth....
 counts_hg  = counts(sce_hg_counts); counts_hg = as(counts_hg,"matrix") ; counts_hg = Matrix(counts_hg, sparse=TRUE)
