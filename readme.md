@@ -9,14 +9,14 @@ The following will set up the environment:
 
 ```{bash}
 #- get docker image
-$ docker pull kostkalab/scds:v1.0
+$ docker pull kostkalab/scds:v2.0
 
 #- run interactive session (bash), for instance:
 $ docker run -it --name scds_tab_fig                                  \
                  --net=host                                           \
                  --env DISPLAY=$DISPLAY                               \
                  --volume $HOME/.Xauthority:/home/rstudio/.Xauthority \
-                 kostkalab/scds:v1.0                                  \
+                 kostkalab/scds:v2.0                                  \
                  /bin/bash
 ```
 
